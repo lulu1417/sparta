@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Record;
 use App\Item;
 use Illuminate\Http\Request;
-use function MongoDB\BSON\toJSON;
+use Illuminate\Support\Facades\Log;
 
 class WorshipController extends BaseController
 {
@@ -33,8 +33,9 @@ class WorshipController extends BaseController
      */
     public function store(Request $request)
     {
-
-        $items = Item::whereIn('item',$request->item)->select('item')
+        Log::info($request->input());
+        date_default_timezone_set('Asia/Taipei');
+        $items = Item::whereIn('item',$request['item'])->select('item')
             ->get();
         $items = $items->toArray();
         $i = 1;
@@ -47,9 +48,13 @@ class WorshipController extends BaseController
             $result[$i] = $create->toArray();
             $i++;
         }
-        $result['message'] = "Worship successfully.";
-        if ($create)
-            return $this->sendResponse($result, 200);
+        if ($create){
+            $request = $request->toArray();
+            $request['time'] = date('Y-m-d H:i:s');
+            return json_encode($request);
+            return $this->sendResponse($request, 200);
+        }
+
     }
 
     /**
